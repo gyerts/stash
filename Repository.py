@@ -1,0 +1,47 @@
+from Link import Link
+from Commit import Commit
+
+class Repository:
+    def __init__(self, stash, project, dict_repository):
+        self.stash = stash
+        self.project = project
+
+        self.statusMessage = dict_repository["statusMessage"]
+        self.name          = dict_repository["name"]
+        self.slug          = dict_repository["slug"]
+        self.id            = dict_repository["id"]
+        self.cloneUrl      = dict_repository["cloneUrl"]
+        self.state         = dict_repository["state"]
+        self.scmId         = dict_repository["scmId"]
+        self.links         = dict_repository["links"]
+        self.public        = dict_repository["public"]
+        self.link          = Link(dict_repository["link"])
+
+    def commits(self, branch=None):
+        url = "%s%s/repos/%s/commits/___branch___"%(self.stash.path_to_stash, self.project.link.url, self.slug)
+
+        if branch is not None:
+            url = url.replace("___branch___", "?until=%s"%branch)
+        else:
+            url = url.replace("/___branch___", "")
+        print(url)
+
+        commits = list()
+        for commit in self.stash.rest_request(url)["values"]:
+            commits.append(Commit(commit))
+
+        return commits
+
+    def show(self):
+        print("statusMessage =", self.statusMessage)
+        print("name =", self.name)
+        print("slug =", self.slug)
+        print("id =", self.id)
+        print("cloneUrl =", self.cloneUrl)
+        print("state =", self.state)
+        print("scmId =", self.scmId)
+        print("links =", self.links)
+        print("public =", self.public)
+        print("link:")
+        self.link.show()
+        print('\n\n')
