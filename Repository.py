@@ -17,8 +17,10 @@ class Repository:
         self.public        = dict_repository["public"]
         self.link          = Link(dict_repository["link"])
 
+        self.url = "%s/repos/%s" % (project.url, self.slug)
+
     def commits(self, branch=None):
-        url = "%s%s/repos/%s/commits/___branch___"%(self.stash.path_to_stash, self.project.link.url, self.slug)
+        url = self.url + "/commits/___branch___"
 
         if branch is not None:
             url = url.replace("___branch___", "?until=%s"%branch)
@@ -31,6 +33,18 @@ class Repository:
             commits.append(Commit(commit))
 
         return commits
+
+    def get_all_pull_requests(self, state="open"):
+        """
+        state could be:
+            open
+            merged
+            declined
+        """
+
+        url = self.stash.path_to_stash + "/projects/LUXTOOLS/repos/iwa/pull-requests?state=%s" % state
+        print(url)
+        return self.rest_request(url)
 
     def show(self):
         print("statusMessage =", self.statusMessage)

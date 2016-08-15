@@ -7,7 +7,7 @@ from Project import Project
 
 class Stash:
     def __init__(self, path_to_stash, login, password):
-        self.path_to_stash = self.__correct_path(path_to_stash) + "/rest/api/1.0"
+        self.url = self.__correct_path(path_to_stash) + "/rest/api/1.0"
         self.basic = (b"Basic " + base64.b64encode(login.encode()+b":"+password.encode())).decode()
 
     def rest_request(self, url):
@@ -18,14 +18,9 @@ class Stash:
 
     def get_all_projects(self):
         projects = list()
-        for project in self.rest_request(self.path_to_stash + "/projects")['values']:
+        for project in self.rest_request(self.url + "/projects")['values']:
             projects.append(Project(self, project))
         return projects
-
-    def get_all_pull_requests(self):
-        url = self.path_to_stash + "/projects/LUXTOOLS/repos/iwa/pull-requests"
-        print(url)
-        return self.rest_request(url)
 
     def get_project_by_name(self, name):
         for project in self.get_all_projects():

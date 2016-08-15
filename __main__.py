@@ -24,4 +24,11 @@ if __name__ == "__main__":
         f.close()
 
     stash = Stash("https://adc.luxoft.com/stash", login, password)
-    print(stash.get_all_pull_requests())
+
+    # for project in stash.get_all_projects():
+    #     for repo in project.get_all_repositories():
+    #         print(project.name, ":", repo.name)
+    #         for commit in repo.commits():
+    #             print(commit.author.name)
+
+    #print(stash.get_all_pull_requests(state="merged"))

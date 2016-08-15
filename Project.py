@@ -14,10 +14,18 @@ class Project:
         self.public = dict_project["public"]
         self.link   = Link(dict_project["link"])
 
+        self.url = self.stash.url + self.link.url
+
     def get_all_repositories(self):
         repositories = list()
-        for repository in self.stash.rest_request(self.stash.path_to_stash + self.link.url + "/repos")["values"]:
-            repositories.append(Repository(self.stash, self, repository))
+        for repository in self.stash.rest_request(self.url + "/repos")["values"]:
+            repositories.append(
+                Repository(
+                    stash=self.stash,
+                    project=self,
+                    dict_repository=repository
+                )
+            )
 
         return repositories
 
