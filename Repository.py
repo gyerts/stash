@@ -1,5 +1,6 @@
-from Link import Link
+from Library.Link import Link
 from Commit import Commit
+
 
 class Repository:
     def __init__(self, stash, project, dict_repository):
@@ -17,6 +18,11 @@ class Repository:
         self.public        = dict_repository["public"]
         self.link          = Link(dict_repository["link"])
 
+        try:
+            self.forkable = dict_repository["forkable"]
+        except Exception as ex:
+            print("Exception: ", ex)
+
         self.url = "%s/repos/%s" % (project.url, self.slug)
 
     def commits(self, branch=None):
@@ -26,7 +32,7 @@ class Repository:
             url = url.replace("___branch___", "?until=%s"%branch)
         else:
             url = url.replace("/___branch___", "")
-        print(url)
+        print("url: ", url)
 
         commits = list()
         for commit in self.stash.rest_request(url)["values"]:
@@ -42,9 +48,9 @@ class Repository:
             declined
         """
 
-        url = self.stash.path_to_stash + "/projects/LUXTOOLS/repos/iwa/pull-requests?state=%s" % state
-        print(url)
-        return self.rest_request(url)
+        url = self.url + "/pull-requests?state=%s" % state
+        print("url: ", url)
+        return self.stash.rest_request(url)['values']
 
     def show(self):
         print("statusMessage =", self.statusMessage)

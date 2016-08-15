@@ -1,5 +1,5 @@
 from Repository import Repository
-from Link import Link
+from Library.Link import Link
 
 
 class Project:
@@ -28,6 +28,17 @@ class Project:
             )
 
         return repositories
+
+    def get_repository_by_name(self, name):
+        for repository in self.stash.rest_request(self.url + "/repos")["values"]:
+            repo = Repository(
+                stash=self.stash,
+                project=self,
+                dict_repository=repository
+            )
+            if repo.name == name:
+                return repo
+        return None
 
     def show(self):
         print("name   =", self.name)

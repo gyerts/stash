@@ -1,4 +1,5 @@
 from Stash import Stash
+from PullRequest.PullRequest import PullRequest
 import os
 import base64
 ola_gang_num_style = "asdljgiod;fug09eirtelrmgmnknv;gheriljg"
@@ -25,10 +26,17 @@ if __name__ == "__main__":
 
     stash = Stash("https://adc.luxoft.com/stash", login, password)
 
+    # ---------- Get All Commits ----------
     # for project in stash.get_all_projects():
     #     for repo in project.get_all_repositories():
     #         print(project.name, ":", repo.name)
     #         for commit in repo.commits():
     #             print(commit.author.name)
 
-    #print(stash.get_all_pull_requests(state="merged"))
+    # ---------- Get All Pull Requests ----------
+    project = stash.get_project_by_name("Luxoft Tools")
+    repository = project.get_repository_by_name("iwa")
+
+    for pull_request in repository.get_all_pull_requests(state="merged"):
+        pr = PullRequest(stash, pull_request)
+        pr.show()
