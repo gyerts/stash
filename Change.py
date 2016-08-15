@@ -12,7 +12,7 @@ class Change:
         self.state = None
         self.reviewers = list()
         self.files = list()
-        self.formats = None
+        self.formats = set()
         self.comments = list()
         self.comments_text = list()
         self.time_spent = None

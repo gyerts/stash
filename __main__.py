@@ -54,7 +54,14 @@ if __name__ == "__main__":
 
         change.change = commit.displayId
         change.date = commit.authorTimestamp
+        change.author = commit.author.name
 
-        # change.author = commit.author.user.name
+        for file in commit.files:
+            change.files.append(file.path.toString)
+            change.formats.add(file.path.extension)
 
-        commit.show()
+        changes.append(change)
+
+    for change in changes:
+        print('\n\n')
+        change.show()
