@@ -49,6 +49,8 @@ if __name__ == "__main__":
     changes = list()
 
     print(project.name, ":", repository.name)
+
+    # Fetch all information from commits
     for commit in repository.commits():
         change = Change()
 
@@ -62,6 +64,12 @@ if __name__ == "__main__":
 
         changes.append(change)
 
+    # Fetch all information from pull requests
+
+    for pull_request in repository.get_all_pull_requests(state="merged"):
+        pull_request = PullRequest(stash, repository.url, pull_request)
+        pull_request.show()
+
     for change in changes:
         print('\n\n')
-        change.show()
+        #change.show()

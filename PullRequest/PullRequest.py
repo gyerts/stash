@@ -2,11 +2,13 @@ from Library.Link import Link
 from Library.Ref import Ref
 from Library.Person import Person
 from Commit import Commit
+from Library.File import File
 
 
 class PullRequest:
     def __init__(self, stash, url, dict_pull_request):
         self.url = url + "/pull-requests/1"
+        self.parent_url = url
         self.stash = stash
 
         self.id           = dict_pull_request["id"]
@@ -33,11 +35,11 @@ class PullRequest:
         self.changed_files = self.__get_files()
 
     def __get_files(self):
-        url = self.url + "/commits"
         files = list()
-        ans = self.stash.rest_request(url)
-        for file in ans['values']:
-            files.append(Commit(file))
+        for commit in self.commits:
+            for file in commit.files:
+                files.append(file.path.toString)
+
         return files
 
 
@@ -46,8 +48,15 @@ class PullRequest:
         commits = list()
         ans = self.stash.rest_request(url)
         for commit in ans['values']:
-            commits.append(Commit(commit))
+            commits.append(Commit(self.parent_url, self.stash, commit))
         return commits
+
+    def __get_changed_files(self):
+        response = self.stash.rest_request(self.url + "/changes")["values"]
+        files = list()
+        for file in response:
+            files.append(File(file))
+        return files
 
     def __get_reviewers(self, dict_users):
         reviewers = list()
@@ -82,3 +91,7 @@ class PullRequest:
         print(tab + "commits: ")
         for commit in self.commits:
             commit.show(tab + "   ")
+
+        print(tab + "files: ")
+        for file in self.changed_files:
+            print(tab + "   " + file)

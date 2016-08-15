@@ -11,6 +11,7 @@ class Stash:
         self.basic = (b"Basic " + base64.b64encode(login.encode()+b":"+password.encode())).decode()
 
     def rest_request(self, url):
+        print(url)
         req = urllib.request.Request(url)
         req.add_header("Authorization", self.basic)
         req.add_header("Content-Type", "application/json")
