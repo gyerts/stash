@@ -38,5 +38,5 @@ if __name__ == "__main__":
     repository = project.get_repository_by_name("iwa")
 
     for pull_request in repository.get_all_pull_requests(state="merged"):
-        pr = PullRequest(stash, pull_request)
+        pr = PullRequest(stash, repository.url, pull_request)
         pr.show()

@@ -2,17 +2,19 @@ from Library.User import User
 
 class Commit:
     def __init__(self, dict_commit):
-        self.author = User(dict_commit['author'])
         self.id = dict_commit['id']
-        self.parents = dict_commit['parents']
         self.displayId = dict_commit['displayId']
-        self.message = dict_commit['message']
+        self.author = User(dict_commit['author'])
         self.authorTimestamp = dict_commit['authorTimestamp']
+        self.message = dict_commit['message']
+        self.parents = dict_commit['parents']
 
-    def show(self):
-        self.author.show()
-        print("id =", self.id)
-        print("parents =", self.parents)
-        print("displayId =", self.displayId)
-        print("message =", self.message)
-        print("authorTimestamp =", self.authorTimestamp)
+    def show(self, tab="   "):
+        print(tab + "/* --------------------")
+        self.author.show(tab)
+        print(tab+"id =", self.id)
+        print(tab+"parents =", self.parents)
+        print(tab+"displayId =", self.displayId)
+        print(tab+"message =", self.message)
+        print(tab+"authorTimestamp =", self.authorTimestamp)
+        print(tab + "-------------------- */")

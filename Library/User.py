@@ -17,7 +17,19 @@ class User:
         except Exception as ex:
             print("User.Exception [OK BEHAVIOUR]: ", ex)
 
-    def show(self):
-        print("author:")
-        print("    name         =", self.name)
-        print("    emailAddress =", self.emailAddress)
+    def show(self, tab="   "):
+        print(tab + "author:")
+        print(tab + tab + "name =", self.name)
+        print(tab + tab + "emailAddress =", self.emailAddress)
+
+        try:
+            print(tab + tab + "id:", self.id)
+            print(tab + tab + "displayName:", self.displayName)
+            print(tab + tab + "active:", self.active)
+            print(tab + tab + "slug:", self.slug)
+            print(tab + tab + "type:", self.type)
+            self.link.show(tab + "      ")
+            print(tab + tab + "links:", self.links)
+
+        except Exception as ex:
+            print(tab + "User.Exception [OK BEHAVIOUR]: ", ex)
