@@ -10,11 +10,13 @@ class Stash:
         self.url = self.__correct_path(path_to_stash) + "/rest/api/1.0"
         self.basic = (b"Basic " + base64.b64encode(login.encode()+b":"+password.encode())).decode()
 
-    def rest_request(self, url):
-        print(url)
+    def rest_request(self, url, method="GET"):
+        # print(url)
         req = urllib.request.Request(url)
         req.add_header("Authorization", self.basic)
         req.add_header("Content-Type", "application/json")
+        req.add_header("pullRequestId", "1")
+        req.method = method
         return json.loads(urllib.request.urlopen(req).read().decode())
 
     def get_all_projects(self):

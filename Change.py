@@ -5,11 +5,11 @@ class Change:
     def __init__(self):
         self.change = None
         self.date = None
-        self.review = None
-        self.reviewed = None
+        self.review = ''
+        self.reviewed = ''
         self.author = None
         self.domain = None
-        self.state = None
+        self.state = ''
         self.reviewers = list()
         self.files = list()
         self.formats = set()

@@ -7,7 +7,6 @@ from Library.File import File
 
 class PullRequest:
     def __init__(self, stash, url, dict_pull_request):
-        self.url = url + "/pull-requests/1"
         self.parent_url = url
         self.stash = stash
 
@@ -23,29 +22,46 @@ class PullRequest:
         self.fromRef      = Ref(stash, "fromRef", dict_pull_request["fromRef"])
         self.toRef        = Ref(stash, "toRef", dict_pull_request["toRef"])
 
+        self.url = url + "/pull-requests/" + str(self.id)
+
         self.author       = Person(dict_pull_request["author"])
         self.reviewers    = self.__get_reviewers(dict_pull_request["reviewers"])
 
         self.participants = dict_pull_request["participants"]
-        self.attributes   = dict_pull_request["attributes"]
         self.link         = Link(dict_pull_request["link"])
         self.links        = dict_pull_request["links"]
 
+        try:
+            self.attributes = dict_pull_request["attributes"]
+        except:
+            self.attributes = None
+
         self.commits = self.__get_commits()
         self.changed_files = self.__get_files()
+
+    def conteins(self, obj_commit):
+        for commit in self.commits:
+            if commit.id == obj_commit.id:
+                return True
+        return False
+
+    def comments(self):
+        return self.stash.rest_request(self.url + "/comments", "POST")
 
     def __get_files(self):
         files = list()
         for commit in self.commits:
             for file in commit.files:
+                file.show()
                 files.append(file.path.toString)
 
         return files
 
-
     def __get_commits(self):
         url = self.url + "/commits"
         commits = list()
+        print("*****************************", url)
+
         ans = self.stash.rest_request(url)
         for commit in ans['values']:
             commits.append(Commit(self.parent_url, self.stash, commit))
@@ -84,7 +100,7 @@ class PullRequest:
             reviewer.show(tab + tab)
 
         print(tab + "participants: ", self.participants)
-        print(tab + "attributes: ", self.attributes)
+        # print(tab + "attributes: ", self.attributes)
         self.link.show(tab)
         print(tab + "links: ", self.links)
 

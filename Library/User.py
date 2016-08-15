@@ -14,8 +14,9 @@ class User:
             self.link        = Link(dict_user["link"])
             self.links       = dict_user["links"]
 
-        except Exception as ex:
-            print("User.Exception [OK BEHAVIOUR]: ", ex)
+        except:
+            self.id = self.displayName = self.active = self.slug = \
+                self.type = self.link = self.links = None
 
     def show(self, tab="   "):
         print(tab + "author:")

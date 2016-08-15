@@ -20,8 +20,8 @@ class Repository:
 
         try:
             self.forkable = dict_repository["forkable"]
-        except Exception as ex:
-            print("Exception: ", ex)
+        except:
+           self.forkable = None
 
         self.url = "%s/repos/%s" % (project.url, self.slug)
 
@@ -32,7 +32,6 @@ class Repository:
             url = url.replace("___branch___", "?until=%s"%branch)
         else:
             url = url.replace("/___branch___", "")
-        print("url: ", url)
 
         commits = list()
         for commit in self.stash.rest_request(url)["values"]:
@@ -49,7 +48,6 @@ class Repository:
         """
 
         url = self.url + "/pull-requests?state=%s" % state
-        print("url: ", url)
         return self.stash.rest_request(url)['values']
 
     def show(self):
@@ -62,6 +60,7 @@ class Repository:
         print("scmId =", self.scmId)
         print("links =", self.links)
         print("public =", self.public)
+        print("forkable =", self.forkable)
         print("link:")
         self.link.show()
         print('\n\n')
