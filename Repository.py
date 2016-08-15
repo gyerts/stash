@@ -36,7 +36,7 @@ class Repository:
 
         commits = list()
         for commit in self.stash.rest_request(url)["values"]:
-            commits.append(Commit(commit))
+            commits.append(Commit(self.url, self.stash, commit))
 
         return commits
 

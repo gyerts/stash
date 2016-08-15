@@ -1,12 +1,12 @@
 from collections import OrderedDict
 
+
 class Change:
     def __init__(self):
         self.change = None
         self.date = None
         self.review = None
-        self.found_in_git = None
-        self.found_in_stash = None
+        self.reviewed = None
         self.author = None
         self.domain = None
         self.state = None
@@ -23,8 +23,7 @@ class Change:
         output["change"] = self.change
         output["date"] = self.date
         output["review"] = self.review
-        output["found_in_git"] = self.found_in_git
-        output["found_in_stash"] = self.found_in_stash
+        output["reviewed"] = self.reviewed
         output["author"] = self.author
         output["domain"] = self.domain
         output["state"] = self.state
@@ -42,8 +41,7 @@ class Change:
         print(tab, {"change":self.change})
         print(tab, {"date":self.date})
         print(tab, {"review":self.review})
-        print(tab, {"found_in_git":self.found_in_git})
-        print(tab, {"found_in_stash":self.found_in_stash})
+        print(tab, {"reviewed":self.reviewed})
         print(tab, {"author":self.author})
         print(tab, {"domain":self.domain})
         print(tab, {"state":self.state})

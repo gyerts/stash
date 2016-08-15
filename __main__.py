@@ -1,5 +1,6 @@
 from Stash import Stash
 from PullRequest.PullRequest import PullRequest
+from Change import Change
 import os
 import base64
 ola_gang_num_style = "asdljgiod;fug09eirtelrmgmnknv;gheriljg"
@@ -34,9 +35,26 @@ if __name__ == "__main__":
     #             print(commit.author.name)
 
     # ---------- Get All Pull Requests ----------
+    # project = stash.get_project_by_name("Luxoft Tools")
+    # repository = project.get_repository_by_name("iwa")
+    #
+    # for pull_request in repository.get_all_pull_requests(state="merged"):
+    #     pr = PullRequest(stash, repository.url, pull_request)
+    #     pr.show()
+
+    # ---------- Get All Commits ----------
     project = stash.get_project_by_name("Luxoft Tools")
     repository = project.get_repository_by_name("iwa")
 
-    for pull_request in repository.get_all_pull_requests(state="merged"):
-        pr = PullRequest(stash, repository.url, pull_request)
-        pr.show()
+    changes = list()
+
+    print(project.name, ":", repository.name)
+    for commit in repository.commits():
+        change = Change()
+
+        change.change = commit.displayId
+        change.date = commit.authorTimestamp
+
+        # change.author = commit.author.user.name
+
+        commit.show()
