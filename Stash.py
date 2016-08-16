@@ -15,8 +15,11 @@ class Stash:
     def get_owner(self):
         return self.owner.get_owner() + " -> Stash: url=" + self.url
 
-    def rest_request(self, url, method="GET"):
-        # print(url)
+    def rest_request(self, example, url, method="GET"):
+        # print("/|======")
+        # print("||", example)
+        # print("||", url)
+        # print("\|======")
         req = urllib.request.Request(url)
         req.add_header("Authorization", self.basic)
         req.add_header("Content-Type", "application/json")
@@ -25,7 +28,10 @@ class Stash:
 
     def get_all_projects(self):
         projects = list()
-        for project in self.rest_request(self.url + "/projects")['values']:
+        # to get all projects -------------------
+        example = "{server}/rest/api/1.0/projects"
+        # ---------------------------------------
+        for project in self.rest_request(example, self.url + "/projects")['values']:
             projects.append(Project(self, self, project))
         return projects
 

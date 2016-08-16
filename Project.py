@@ -35,7 +35,10 @@ class Project:
         return repositories
 
     def get_repository_by_name(self, name):
-        for repository in self.stash.rest_request(self.url + "/repos")["values"]:
+        # to get changed files -------------------------------------
+        example = "{server}/rest/api/1.0/projects/{project_id}/repos"
+        # ----------------------------------------------------------
+        for repository in self.stash.rest_request(example, self.url + "/repos")["values"]:
             repo = Repository(
                 owner=self,
                 stash=self.stash,

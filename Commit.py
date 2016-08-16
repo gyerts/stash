@@ -18,18 +18,26 @@ class Commit:
         self.parents = dict_commit['parents']
 
         self.url = "%s/commits/%s" % (url, self.id)
-        self.pull_request_url = pull_request_url
+
+        if "" != pull_request_url:
+            self.pull_request_url = pull_request_url
+        else:
+            self.pull_request_url = url
 
         self.files = self.__get_changed_files()
 
     def get_owner(self):
-        return self.owner.get_owner() + " -> Commit: id=" + self.displayId
+        return self.owner.get_owner() + " -> Commit: id=" + str(self.displayId)
 
     def __get_changed_files(self):
-        response = self.stash.rest_request(self.url + "/changes")["values"]
+        # to get changed files -----------------------------------------------------------------------------
+        example = "{server}/rest/api/1.0/projects/{project_id}/repos/{repo_slug}/commits/{commit_id}/changes"
+        # --------------------------------------------------------------------------------------------------
+        response = self.stash.rest_request(example, self.url + "/changes")["values"]
+
         files = list()
         for file in response:
-            files.append(File(self, self.stash, self.pull_request_url, file))
+            files.append(File(self, self.stash, file))
         return files
 
     def show(self, tab="   "):

@@ -3,11 +3,10 @@ from Library.Link import Link
 from Library.Comment import Comment
 
 class File:
-    def __init__(self, owner, stash, url, dict_file):
+    def __init__(self, owner, stash, dict_file):
         self.owner = owner
 
         self.stash = stash
-        self.parent_url = url
 
         self.contentId = dict_file["contentId"]
         self.path = Path(self, dict_file["path"])
@@ -24,10 +23,8 @@ class File:
 
         self.__comments = None
 
-        print(url, "->", self.owner, "->", self.path.toString)
-
     def get_owner(self):
-        return self.owner.get_owner() + " -> File: contentId=" + self.contentId
+        return self.owner.get_owner() + " -> File: name=" + self.path.name
 
     def show(self, tab="    "):
         print(tab, "contentId: ",        self.contentId)
@@ -41,10 +38,17 @@ class File:
 
     def get_comments(self):
         if self.__comments is None:
-            url = self.parent_url + "/comments?path=%s" % self.path.toString
-            print("URL ------------->", url)
-            values = self.stash.rest_request(url)["values"]
+            self.__comments = list()
+            # --------------------------------------------------------------------------------------------------
+            example1 = "{server}/rest/api/1.0/projects/{project_id}/repos/{repo_slug}/pull-requests/{id_of_pull_request}/comments?path={path_to_file}"
+            # --------------------------------------------------------------------------------------------------
+            example2 = "{server}/rest/api/1.0/projects/{project_id}/repos/{repo_slug}/commits/{commit_id}/comments?path={path_to_file}"
+            # --------------------------------------------------------------------------------------------------
+            url = self.owner.url + "/comments?path=%s" % self.path.toString
+            values = self.stash.rest_request(example1, url)["values"]
+
             for comment in values:
-                self.__comments.append(Comment(self, comment))
-        else:
-            return list()
+                comment = Comment(self, comment)
+                self.__comments.append(comment.user.name + ": " + comment.text)
+
+        return self.__comments

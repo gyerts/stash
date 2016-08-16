@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     # ---------- Get All Commits ----------
     project = stash.get_project_by_name("Luxoft Tools")
-    repository = project.get_repository_by_name("iwa")
+    repository = project.get_repository_by_name("jrt")
 
     changes = list()
 
@@ -74,14 +74,14 @@ if __name__ == "__main__":
         pr = PullRequest(start, stash, repository.url, pull_request)
         pull_requests_declined.append(pr)
 
-
-
     # Fetch all information from commits
     commits = repository.commits()
     for commit in commits:
         if len(commit.files) > 0:
             change = Change(start)
 
+            _reviewed_ = False
+            comments_counter = 0
             change.change = commit.id
             change.date = commit.authorTimestamp
             change.author = commit.author.name
@@ -90,44 +90,70 @@ if __name__ == "__main__":
                 change.files.append(file.path.toString)
                 change.formats.add(file.path.extension)
 
-            for pull_request in pull_requests_merged:
-                if pull_request.conteins(commit):
-                    change.state = "Reviewed"
-                    change.reviewed = "True"
-                    change.review += commit.url.replace("/rest/api/1.0", "")
+            if not _reviewed_:
+                for pull_request in pull_requests_merged:
+                    if pull_request.conteins(commit):
+                        _reviewed_ = True
+                        change.state = "Reviewed"
+                        change.reviewed = "True"
+                        change.review += commit.url.replace("/rest/api/1.0", "")
 
-                    for reviewer in pull_request.reviewers:
-                        change.reviewers.append(reviewer.name)
+                        for reviewer in pull_request.reviewers:
+                            change.reviewers.append(reviewer.name)
 
-                    for comment in pull_request.comments:
-                        change.comments.append(str(comment))
+                        for comment in pull_request.comments:
+                            comments_counter += 1
+                            change.comments_text.append(str(comment))
+                        for file in pull_request.get_commit_by_id(commit.id).files:
+                            list_of_comments = file.get_comments()
+                            if len(list_of_comments) > 0:
+                                comments_counter += len(list_of_comments)
+                                change.comments_text.append(file.path.name + ": " + str(list_of_comments))
 
-                    for file in commit.files:
-                        change.comments.append(file.path.name + ": " + str(file.get_comments()))
+            if not _reviewed_:
+                for pull_request in pull_requests_open:
+                    if pull_request.conteins(commit):
+                        _reviewed_ = True
+                        change.state = "Under review"
+                        change.reviewed = "False"
+                        change.review += commit.url.replace("/rest/api/1.0", "")
 
-            for pull_request in pull_requests_open:
-                if pull_request.conteins(commit):
-                    change.state = "Under review"
-                    change.reviewed = "False"
-                    change.review += commit.url.replace("/rest/api/1.0", "")
+                        for comment in pull_request.comments:
+                            comments_counter += 1
+                            change.comments_text.append(str(comment))
+                        for file in pull_request.get_commit_by_id(commit.id).files:
+                            list_of_comments = file.get_comments()
+                            if len(list_of_comments) > 0:
+                                comments_counter += len(list_of_comments)
+                                change.comments_text.append(file.path.name + ": " + str(list_of_comments))
 
-                    for comment in pull_request.comments:
-                        change.comments.append(str(comment))
-                    for file in commit.files:
-                        change.comments.append(file.path.name + ": " + str(file.get_comments()))
+            if not _reviewed_:
+                for pull_request in pull_requests_declined:
+                    if pull_request.conteins(commit):
+                        _reviewed_ = True
+                        change.state = "Declined"
+                        change.reviewed = "True"
+                        change.review += commit.url.replace("/rest/api/1.0", "")
 
-            for pull_request in pull_requests_declined:
-                if pull_request.conteins(commit):
-                    change.state = "Declined"
-                    change.reviewed = "True"
-                    change.review += commit.url.replace("/rest/api/1.0", "")
+                        for reviewer in pull_request.reviewers:
+                            change.reviewers.append(reviewer.name)
+                        for comment in pull_request.comments:
+                            comments_counter += 1
+                            change.comments_text.append(str(comment))
+                        for file in pull_request.get_commit_by_id(commit.id).files:
+                            list_of_comments = file.get_comments()
+                            if len(list_of_comments) > 0:
+                                comments_counter += len(list_of_comments)
+                                change.comments_text.append(file.path.name + ": " + str(list_of_comments))
 
-                    for reviewer in pull_request.reviewers:
-                        change.reviewers.append(reviewer.name)
-                    for comment in pull_request.comments:
-                        change.comments.append(str(comment))
-                    for file in commit.files:
-                        change.comments.append(file.path.name + ": " + str(file.get_comments()))
+            if not _reviewed_:
+                for file in commit.files:
+                    list_of_comments = file.get_comments()
+                    if len(list_of_comments) > 0:
+                        comments_counter += len(list_of_comments)
+                        change.comments_text.append(file.path.name + ": " + str(list_of_comments))
+
+            change.comments = comments_counter
 
             changes.append(change)
 

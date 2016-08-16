@@ -44,7 +44,13 @@ class PullRequest:
         self.comments = self.__get_comments()
 
     def get_owner(self):
-        return self.owner.get_owner() + " -> PullRequest: id=" + self.id
+        return self.owner.get_owner() + " -> PullRequest: id=" + str(self.id)
+
+    def get_commit_by_id(self, id):
+        for commit in self.commits:
+            if commit.id == id:
+                return commit
+        return None
 
     def conteins(self, obj_commit):
         for commit in self.commits:
@@ -53,7 +59,12 @@ class PullRequest:
         return False
 
     def __get_comments(self):
-        response = self.stash.rest_request(self.url + "/activities")["values"]
+        url = self.url + "/activities"
+        # --------------------------------------------------------------------------------------------------
+        example = "{server}/rest/api/1.0/projects/{project_id}/repos/{repo_slug}/pull-requests/{id_of_pull_request}/activities"
+        # --------------------------------------------------------------------------------------------------
+        response = self.stash.rest_request(example, url)["values"]
+
         comments = list()
         for activity in response:
             if "COMMENTED" == activity["action"] and "commentAnchor" not in activity:
@@ -76,11 +87,14 @@ class PullRequest:
         return files
 
     def __get_commits(self):
-        url = self.url + "/commits"
         commits = list()
-        print("*****************************", url)
+        url = self.url + "/commits"
+        # --------------------------------------------------------------------------------------------------
+        example = "{server}/rest/api/1.0/projects/{project_id}/repos/{repo_slug}/pull-requests/{id_of_pull_request}/commits"
+        # --------------------------------------------------------------------------------------------------
 
-        ans = self.stash.rest_request(url)
+        print("*****************************", url)
+        ans = self.stash.rest_request(example, url)
         for commit in ans['values']:
             commits.append(Commit(self, self.parent_url, self.stash, commit, self.url))
         return commits

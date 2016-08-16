@@ -31,6 +31,9 @@ class Repository:
         return self.owner.get_owner() + " -> Repository: slug=" + self.slug
 
     def commits(self, branch=None):
+        # --------------------------------------------------------------------------------------------------
+        example = "{server}/rest/api/1.0/projects/{project_id}/repos/{repo_slug}/commits[/{branch}]"
+        # --------------------------------------------------------------------------------------------------
         url = self.url + "/commits/___branch___"
 
         if branch is not None:
@@ -39,7 +42,7 @@ class Repository:
             url = url.replace("/___branch___", "")
 
         commits = list()
-        for commit in self.stash.rest_request(url)["values"]:
+        for commit in self.stash.rest_request(example, url)["values"]:
             commits.append(Commit(self, self.url, self.stash, commit))
 
         return commits
@@ -52,8 +55,11 @@ class Repository:
             declined
         """
 
+        # --------------------------------------------------------------------------------------------------
+        example = "{server}/rest/api/1.0/projects/{project_id}/repos/{repo_slug}/pull-requests/{id_of_pull_request}/[?state={state}]"
+        # --------------------------------------------------------------------------------------------------
         url = self.url + "/pull-requests?state=%s" % state
-        return self.stash.rest_request(url)['values']
+        return self.stash.rest_request(example, url)['values']
 
     def show(self):
         print("statusMessage =", self.statusMessage)
