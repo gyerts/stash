@@ -7,6 +7,11 @@ import base64
 
 ola_gang_num_style = "asdljgiod;fug09eirtelrmgmnknv;gheriljg"
 
+class Start:
+    def get_owner(self):
+        return "Start::::"
+start = Start()
+
 if __name__ == "__main__":
     if os.path.exists('credentials'):
         f = open("credentials")
@@ -27,7 +32,7 @@ if __name__ == "__main__":
         f.write(base64.b64encode(bytes(password + ola_gang_num_style, 'utf-8')))
         f.close()
 
-    stash = Stash("https://adc.luxoft.com/stash", login, password)
+    stash = Stash(start, "https://adc.luxoft.com/stash", login, password)
 
     # ---------- Get All Commits ----------
     # for project in stash.get_all_projects():
@@ -58,14 +63,16 @@ if __name__ == "__main__":
     pull_requests_declined = list()  # declined
 
     for pull_request in repository.get_all_pull_requests(state="merged"):
-        pull_requests_merged.append(PullRequest(stash, repository.url, pull_request))
+        pr = PullRequest(start, stash, repository.url, pull_request)
+        pull_requests_merged.append(pr)
 
     for pull_request in repository.get_all_pull_requests(state="open"):
-        pull_requests_open.append(PullRequest(stash, repository.url, pull_request))
+        pr = PullRequest(start, stash, repository.url, pull_request)
+        pull_requests_open.append(pr)
 
     for pull_request in repository.get_all_pull_requests(state="declined"):
-        pull_requests_declined.append(PullRequest(stash, repository.url, pull_request))
-
+        pr = PullRequest(start, stash, repository.url, pull_request)
+        pull_requests_declined.append(pr)
 
 
 
@@ -73,7 +80,7 @@ if __name__ == "__main__":
     commits = repository.commits()
     for commit in commits:
         if len(commit.files) > 0:
-            change = Change()
+            change = Change(start)
 
             change.change = commit.id
             change.date = commit.authorTimestamp
@@ -92,11 +99,22 @@ if __name__ == "__main__":
                     for reviewer in pull_request.reviewers:
                         change.reviewers.append(reviewer.name)
 
+                    for comment in pull_request.comments:
+                        change.comments.append(str(comment))
+
+                    for file in commit.files:
+                        change.comments.append(file.path.name + ": " + str(file.get_comments()))
+
             for pull_request in pull_requests_open:
                 if pull_request.conteins(commit):
                     change.state = "Under review"
                     change.reviewed = "False"
                     change.review += commit.url.replace("/rest/api/1.0", "")
+
+                    for comment in pull_request.comments:
+                        change.comments.append(str(comment))
+                    for file in commit.files:
+                        change.comments.append(file.path.name + ": " + str(file.get_comments()))
 
             for pull_request in pull_requests_declined:
                 if pull_request.conteins(commit):
@@ -106,12 +124,12 @@ if __name__ == "__main__":
 
                     for reviewer in pull_request.reviewers:
                         change.reviewers.append(reviewer.name)
+                    for comment in pull_request.comments:
+                        change.comments.append(str(comment))
+                    for file in commit.files:
+                        change.comments.append(file.path.name + ": " + str(file.get_comments()))
 
             changes.append(change)
-
-
-
-
 
     for change in changes:
         print('\n\n')

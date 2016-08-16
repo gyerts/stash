@@ -3,7 +3,9 @@ from Commit import Commit
 
 
 class Repository:
-    def __init__(self, stash, project, dict_repository):
+    def __init__(self, owner, stash, project, dict_repository):
+        self.owner = owner
+
         self.stash = stash
         self.project = project
 
@@ -16,7 +18,7 @@ class Repository:
         self.scmId         = dict_repository["scmId"]
         self.links         = dict_repository["links"]
         self.public        = dict_repository["public"]
-        self.link          = Link(dict_repository["link"])
+        self.link          = Link(self, dict_repository["link"])
 
         try:
             self.forkable = dict_repository["forkable"]
@@ -24,6 +26,9 @@ class Repository:
            self.forkable = None
 
         self.url = "%s/repos/%s" % (project.url, self.slug)
+
+    def get_owner(self):
+        return self.owner.get_owner() + " -> Repository: slug=" + self.slug
 
     def commits(self, branch=None):
         url = self.url + "/commits/___branch___"
@@ -35,7 +40,7 @@ class Repository:
 
         commits = list()
         for commit in self.stash.rest_request(url)["values"]:
-            commits.append(Commit(self.url, self.stash, commit))
+            commits.append(Commit(self, self.url, self.stash, commit))
 
         return commits
 

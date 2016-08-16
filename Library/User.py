@@ -1,7 +1,9 @@
 from Library.Link import Link
 
 class User:
-    def __init__(self, dict_user):
+    def __init__(self, owner, dict_user):
+        self.owner = owner
+
         self.name = dict_user["name"]
         self.emailAddress = dict_user["emailAddress"]
 
@@ -11,7 +13,7 @@ class User:
             self.active      = dict_user["active"]
             self.slug        = dict_user["slug"]
             self.type        = dict_user["type"]
-            self.link        = Link(dict_user["link"])
+            self.link        = Link(self, dict_user["link"])
             self.links       = dict_user["links"]
 
         except:
@@ -34,3 +36,6 @@ class User:
 
         except Exception as ex:
             print(tab + "User.Exception [OK BEHAVIOUR]: ", ex)
+
+    def get_owner(self):
+        return self.owner.get_owner() + " -> User: name=" + self.name

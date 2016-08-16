@@ -1,21 +1,25 @@
 from collections import OrderedDict
 
-
 class Change:
-    def __init__(self):
+    def __init__(self, owner):
+        self.owner = owner
+
         self.change = None
         self.date = None
         self.review = ''
         self.reviewed = ''
         self.author = None
         self.domain = None
-        self.state = ''
+        self.state = None
         self.reviewers = list()
         self.files = list()
         self.formats = set()
         self.comments = list()
         self.comments_text = list()
         self.time_spent = None
+
+    def get_owner(self):
+        return self.owner.get_owner() + " -> Change"
 
     def to_dict(self):
         output = OrderedDict()

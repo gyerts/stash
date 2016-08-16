@@ -6,23 +6,27 @@ from Project import Project
 
 
 class Stash:
-    def __init__(self, path_to_stash, login, password):
+    def __init__(self, owner, path_to_stash, login, password):
+        self.owner = owner
+
         self.url = self.__correct_path(path_to_stash) + "/rest/api/1.0"
         self.basic = (b"Basic " + base64.b64encode(login.encode()+b":"+password.encode())).decode()
+
+    def get_owner(self):
+        return self.owner.get_owner() + " -> Stash: url=" + self.url
 
     def rest_request(self, url, method="GET"):
         # print(url)
         req = urllib.request.Request(url)
         req.add_header("Authorization", self.basic)
         req.add_header("Content-Type", "application/json")
-        req.add_header("pullRequestId", "1")
         req.method = method
         return json.loads(urllib.request.urlopen(req).read().decode())
 
     def get_all_projects(self):
         projects = list()
         for project in self.rest_request(self.url + "/projects")['values']:
-            projects.append(Project(self, project))
+            projects.append(Project(self, self, project))
         return projects
 
     def get_project_by_name(self, name):

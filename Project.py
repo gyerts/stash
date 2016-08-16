@@ -3,7 +3,8 @@ from Library.Link import Link
 
 
 class Project:
-    def __init__(self, stash, dict_project):
+    def __init__(self, owner, stash, dict_project):
+        self.owner = owner
         self.stash = stash
 
         self.name   = dict_project["name"]
@@ -12,15 +13,19 @@ class Project:
         self.key    = dict_project["key"]
         self.links  = dict_project["links"]
         self.public = dict_project["public"]
-        self.link   = Link(dict_project["link"])
+        self.link   = Link(self, dict_project["link"])
 
         self.url = self.stash.url + self.link.url
+
+    def get_owner(self):
+        return self.owner.get_owner() + " -> Project: name=" + self.name
 
     def get_all_repositories(self):
         repositories = list()
         for repository in self.stash.rest_request(self.url + "/repos")["values"]:
             repositories.append(
                 Repository(
+                    owner=self,
                     stash=self.stash,
                     project=self,
                     dict_repository=repository
@@ -32,6 +37,7 @@ class Project:
     def get_repository_by_name(self, name):
         for repository in self.stash.rest_request(self.url + "/repos")["values"]:
             repo = Repository(
+                owner=self,
                 stash=self.stash,
                 project=self,
                 dict_repository=repository

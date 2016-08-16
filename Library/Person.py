@@ -2,8 +2,10 @@ from Library.User import User
 
 
 class Person(User):
-    def __init__(self, dict_reviewer):
-        super().__init__(dict_reviewer["user"])
+    def __init__(self, owner, dict_reviewer):
+        self.owner = owner
+
+        super().__init__(self, dict_reviewer["user"])
         self.role = dict_reviewer["role"]
         self.approved = dict_reviewer["approved"]
 
@@ -14,3 +16,5 @@ class Person(User):
         print(tab + "approved:", self.approved)
         print(tab + "----------- User ----------- */")
 
+    def get_owner(self):
+        return self.owner.get_owner() + " -> Person: name=" + self.name

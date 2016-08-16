@@ -1,5 +1,7 @@
 class Path:
-    def __init__(self, dict_path):
+    def __init__(self, owner, dict_path):
+        self.owner = owner
+
         self.components = dict_path["components"]
         self.parent = dict_path["parent"]
         self.name = dict_path["name"]
@@ -12,3 +14,6 @@ class Path:
         print(tab, self.name, self.name)
         print(tab, self.extension, self.extension)
         print(tab, self.toString, self.toString)
+
+    def get_owner(self):
+        return self.owner.get_owner() + " -> Path: toString=" + self.toString
