@@ -24,10 +24,21 @@ class Commit:
         else:
             self.pull_request_url = url
 
-        self.files = self.__get_changed_files()
+        self.__files = None
 
-    def get_owner(self):
-        return self.owner.get_owner() + " -> Commit: id=" + str(self.displayId)
+    def files(self):
+        print(self.get_owner())
+        if self.__files is None:
+            self.__files = self.__get_changed_files()
+
+        return self.__files
+
+    def get_owner(self, info=False):
+        if info:
+            ans = self.owner.get_owner() + " -> Commit: id=" + str(self.displayId)
+        else:
+            ans = self.owner.get_owner() + " -> Commit: id=" + str(self.displayId)
+        return ans
 
     def __get_changed_files(self):
         # to get changed files -----------------------------------------------------------------------------

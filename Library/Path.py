@@ -5,8 +5,12 @@ class Path:
         self.components = dict_path["components"]
         self.parent = dict_path["parent"]
         self.name = dict_path["name"]
-        self.extension = dict_path["extension"]
         self.toString = dict_path["toString"]
+
+        try:
+            self.extension = dict_path["extension"]
+        except:
+            self.extension = ""
 
     def show(self, tab):
         print(tab, self.components, self.components)
@@ -15,5 +19,9 @@ class Path:
         print(tab, self.extension, self.extension)
         print(tab, self.toString, self.toString)
 
-    def get_owner(self):
-        return self.owner.get_owner() + " -> Path: toString=" + self.toString
+    def get_owner(self, info=False):
+        if info:
+            ans = self.owner.get_owner() + " -> Path: toString=" + self.toString
+        else:
+            ans = self.owner.get_owner() + " -> Path"
+        return ans

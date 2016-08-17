@@ -23,8 +23,12 @@ class File:
 
         self.__comments = None
 
-    def get_owner(self):
-        return self.owner.get_owner() + " -> File: name=" + self.path.name
+    def get_owner(self, info=False):
+        if info:
+            ans = self.owner.get_owner() + " -> File: name=" + self.contentId
+        else:
+            ans = self.owner.get_owner() + " -> File"
+        return ans
 
     def show(self, tab="    "):
         print(tab, "contentId: ",        self.contentId)

@@ -27,8 +27,12 @@ class Repository:
 
         self.url = "%s/repos/%s" % (project.url, self.slug)
 
-    def get_owner(self):
-        return self.owner.get_owner() + " -> Repository: slug=" + self.slug
+    def get_owner(self, info=False):
+        if info:
+            ans = self.owner.get_owner() + " -> Repository: slug=" + self.slug
+        else:
+            ans = self.owner.get_owner() + " -> Repository"
+        return ans
 
     def commits(self, branch=None):
         # --------------------------------------------------------------------------------------------------

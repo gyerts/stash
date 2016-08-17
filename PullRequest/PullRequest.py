@@ -43,8 +43,12 @@ class PullRequest:
         self.changed_files = self.__get_files()
         self.comments = self.__get_comments()
 
-    def get_owner(self):
-        return self.owner.get_owner() + " -> PullRequest: id=" + str(self.id)
+    def get_owner(self, info=False):
+        if info:
+            ans = self.owner.get_owner() + " -> PullRequest: id=" + str(self.id)
+        else:
+            ans = self.owner.get_owner() + " -> PullRequest"
+        return ans
 
     def get_commit_by_id(self, id):
         for commit in self.commits:
@@ -81,7 +85,7 @@ class PullRequest:
     def __get_files(self):
         files = list()
         for commit in self.commits:
-            for file in commit.files:
+            for file in commit.files():
                 files.append(file.path.toString)
 
         return files
@@ -103,7 +107,7 @@ class PullRequest:
         response = self.stash.rest_request(self.url + "/changes")["values"]
         files = list()
         for file in response:
-            files.append(File(self.stash, self.url, file, "PullRequest/" + self.id))
+            files.append(File(self.stash, self.url, file))
         return files
 
     def __get_reviewers(self, dict_users):

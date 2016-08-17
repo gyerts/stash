@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     # ---------- Get All Commits ----------
     project = stash.get_project_by_name("Luxoft Tools")
-    repository = project.get_repository_by_name("jrt")
+    repository = project.get_repository_by_slug("iwa")
 
     changes = list()
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     # Fetch all information from commits
     commits = repository.commits()
     for commit in commits:
-        if len(commit.files) > 0:
+        if True:
             change = Change(start)
 
             _reviewed_ = False
@@ -85,10 +85,6 @@ if __name__ == "__main__":
             change.change = commit.id
             change.date = commit.authorTimestamp
             change.author = commit.author.name
-
-            for file in commit.files:
-                change.files.append(file.path.toString)
-                change.formats.add(file.path.extension)
 
             if not _reviewed_:
                 for pull_request in pull_requests_merged:
@@ -104,7 +100,11 @@ if __name__ == "__main__":
                         for comment in pull_request.comments:
                             comments_counter += 1
                             change.comments_text.append(str(comment))
-                        for file in pull_request.get_commit_by_id(commit.id).files:
+                        for file in pull_request.get_commit_by_id(commit.id).files():
+                            #
+                            change.files.append(file.path.toString)
+                            change.formats.add(file.path.extension)
+                            #
                             list_of_comments = file.get_comments()
                             if len(list_of_comments) > 0:
                                 comments_counter += len(list_of_comments)
@@ -122,6 +122,10 @@ if __name__ == "__main__":
                             comments_counter += 1
                             change.comments_text.append(str(comment))
                         for file in pull_request.get_commit_by_id(commit.id).files:
+                            #
+                            change.files.append(file.path.toString)
+                            change.formats.add(file.path.extension)
+                            #
                             list_of_comments = file.get_comments()
                             if len(list_of_comments) > 0:
                                 comments_counter += len(list_of_comments)
@@ -141,13 +145,25 @@ if __name__ == "__main__":
                             comments_counter += 1
                             change.comments_text.append(str(comment))
                         for file in pull_request.get_commit_by_id(commit.id).files:
+                            #
+                            change.files.append(file.path.toString)
+                            change.formats.add(file.path.extension)
+                            #
                             list_of_comments = file.get_comments()
                             if len(list_of_comments) > 0:
                                 comments_counter += len(list_of_comments)
                                 change.comments_text.append(file.path.name + ": " + str(list_of_comments))
 
             if not _reviewed_:
-                for file in commit.files:
+                commit_files = commit.files()
+                if len(commit_files) == 0:
+                    break
+
+                for file in commit_files:
+                    #
+                    change.files.append(file.path.toString)
+                    change.formats.add(file.path.extension)
+                    #
                     list_of_comments = file.get_comments()
                     if len(list_of_comments) > 0:
                         comments_counter += len(list_of_comments)

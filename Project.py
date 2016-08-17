@@ -17,8 +17,12 @@ class Project:
 
         self.url = self.stash.url + self.link.url
 
-    def get_owner(self):
-        return self.owner.get_owner() + " -> Project: name=" + self.name
+    def get_owner(self, info=False):
+        if info:
+            ans = self.owner.get_owner() + " -> Project: name=" + self.name
+        else:
+            ans = self.owner.get_owner() + " -> Project"
+        return ans
 
     def get_all_repositories(self):
         repositories = list()
@@ -46,6 +50,21 @@ class Project:
                 dict_repository=repository
             )
             if repo.name == name:
+                return repo
+        return None
+
+    def get_repository_by_slug(self, slug):
+        # to get changed files -------------------------------------
+        example = "{server}/rest/api/1.0/projects/{project_id}/repos"
+        # ----------------------------------------------------------
+        for repository in self.stash.rest_request(example, self.url + "/repos")["values"]:
+            repo = Repository(
+                owner=self,
+                stash=self.stash,
+                project=self,
+                dict_repository=repository
+            )
+            if repo.slug == slug:
                 return repo
         return None
 

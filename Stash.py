@@ -12,8 +12,12 @@ class Stash:
         self.url = self.__correct_path(path_to_stash) + "/rest/api/1.0"
         self.basic = (b"Basic " + base64.b64encode(login.encode()+b":"+password.encode())).decode()
 
-    def get_owner(self):
-        return self.owner.get_owner() + " -> Stash: url=" + self.url
+    def get_owner(self, info=False):
+        if info:
+            ans = self.owner.get_owner() + " -> Stash: url=" + self.url
+        else:
+            ans = self.owner.get_owner() + " -> Stash"
+        return ans
 
     def rest_request(self, example, url, method="GET"):
         # print("/|======")
