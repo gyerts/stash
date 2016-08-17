@@ -5,7 +5,7 @@ from Library.Stash import Stash
 from Library.PullRequest import PullRequest
 from Change import Change
 import configparser
-
+from report_generator_lib.report_views.stash_report_view import stash_report_view
 
 def get_comments(change, comments_counter, files):
     for file in files:
@@ -20,7 +20,7 @@ def get_comments(change, comments_counter, files):
 
     return [change, comments_counter]
 
-def check(change, _reviewed_, comments_counter, pull_requests):
+def check(change, _reviewed_, comments_counter, pull_requests, commit):
     if not _reviewed_:
         for pull_request in pull_requests:
             if pull_request.conteins(commit):
@@ -74,7 +74,7 @@ def replace_domain_by_mapping(name_of_file, changes):
     return changes
 
 
-if __name__ == "__main__":
+def generate_stash_review_report(path_to_stash, project_name, repo_slug, responsibilities_ini, file_output):
     if os.path.exists('credentials'):
         f = open("credentials")
 
@@ -94,26 +94,11 @@ if __name__ == "__main__":
         f.write(base64.b64encode(bytes(password + ola_gang_num_style, 'utf-8')))
         f.close()
 
-    stash = Stash(start, "https://adc.luxoft.com/stash", login, password)
+    stash = Stash(start, path_to_stash, login, password)
 
     # ---------- Get All Commits ----------
-    # for project in stash.get_all_projects():
-    #     for repo in project.get_all_repositories():
-    #         print(project.name, ":", repo.name)
-    #         for commit in repo.commits():
-    #             print(commit.author.name)
-
-    # ---------- Get All Pull Requests ----------
-    # project = stash.get_project_by_name("Luxoft Tools")
-    # repository = project.get_repository_by_name("iwa")
-    #
-    # for pull_request in repository.get_all_pull_requests(state="merged"):
-    #     pr = PullRequest(stash, repository.url, pull_request)
-    #     pr.show()
-
-    # ---------- Get All Commits ----------
-    project = stash.get_project_by_name("Luxoft Tools")
-    repository = project.get_repository_by_slug("iwa")
+    project = stash.get_project_by_name(project_name)
+    repository = project.get_repository_by_slug(repo_slug)
 
     changes = list()
 
@@ -149,9 +134,14 @@ if __name__ == "__main__":
             change.date = commit.authorTimestamp
             change.author = commit.author.name
 
-            change, _reviewed_, comments_counter = check(change, _reviewed_, comments_counter, pull_requests_merged)
-            change, _reviewed_, comments_counter = check(change, _reviewed_, comments_counter, pull_requests_open)
-            change, _reviewed_, comments_counter = check(change, _reviewed_, comments_counter, pull_requests_declined)
+            change, _reviewed_, comments_counter = \
+                check(change, _reviewed_, comments_counter, pull_requests_merged, commit)
+
+            change, _reviewed_, comments_counter = \
+                check(change, _reviewed_, comments_counter, pull_requests_open, commit)
+
+            change, _reviewed_, comments_counter = \
+                check(change, _reviewed_, comments_counter, pull_requests_declined, commit)
 
             if not _reviewed_:
                 commit_files = commit.files()
@@ -161,10 +151,17 @@ if __name__ == "__main__":
             change.comments = comments_counter
             changes.append(change)
 
-    changes = replace_domain_by_mapping('responsibles.ini', changes)
+    changes = replace_domain_by_mapping(responsibilities_ini, changes)
+    output = list()
+    for change in changes:
+        output.append(change.to_dict())
+    stash_report_view(output, file_output)
 
-    with open('data.json', 'w') as fp:
-        output = list()
-        for change in changes:
-            output.append(change.to_dict())
-        json.dump(output, fp, sort_keys=True, indent=4)
+
+if __name__ == "__main__":
+    generate_stash_review_report(path_to_stash="https://adc.luxoft.com/stash",
+                                 responsibilities_ini="responsibles.ini",
+                                 project_name="Luxoft Tools",
+                                 repo_slug="unified-integration-tooling",
+                                 file_output="output.xlsx"
+                                 )
