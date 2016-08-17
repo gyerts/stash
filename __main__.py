@@ -1,6 +1,6 @@
 import os
 import base64
-
+import json
 from Library.Stash import Stash
 from Library.PullRequest import PullRequest
 from Change import Change
@@ -70,8 +70,7 @@ def replace_domain_by_mapping(name_of_file, changes):
                     if mappings[mapping] not in domains:
                         domains.append(mappings[mapping])
                     break
-
-        change.domain = ", ".join(domains)
+        change.domain = domains
     return changes
 
 
@@ -164,6 +163,8 @@ if __name__ == "__main__":
 
     changes = replace_domain_by_mapping('responsibles.ini', changes)
 
-    for change in changes:
-        print('\n\n')
-        change.show()
+    with open('data.json', 'w') as fp:
+        output = list()
+        for change in changes:
+            output.append(change.to_dict())
+        json.dump(output, fp, sort_keys=True, indent=4)

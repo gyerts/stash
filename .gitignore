@@ -91,3 +91,6 @@ ENV/
 # Pycharm
 .idea/
 credentials
+/data.json
+report_generator_lib/
+/output.xlsx

@@ -33,7 +33,7 @@ class Change:
         output["state"] = self.state
         output["reviewers"] = self.reviewers
         output["files"] = self.files
-        output["formats"] = self.formats
+        output["formats"] = list(self.formats)
         output["comments"] = self.comments
         output["comments_text"] = self.comments_text
         output["time_spent"] = self.time_spent
@@ -51,7 +51,7 @@ class Change:
         print(tab, {"state":self.state})
         print(tab, {"reviewers":self.reviewers})
         print(tab, {"files":self.files})
-        print(tab, {"formats":self.formats})
+        print(tab, {"formats":list(self.formats)})
         print(tab, {"comments":self.comments})
         print(tab, {"comments_text":self.comments_text})
         print(tab, {"time_spent":self.time_spent})
