@@ -1,8 +1,46 @@
-from Stash import Stash
-from PullRequest.PullRequest import PullRequest
-from Change import Change
 import os
 import base64
+
+from Library.Stash import Stash
+from Library.PullRequest import PullRequest
+from Change import Change
+import configparser
+
+
+def get_comments(change, comments_counter, files):
+    for file in files:
+        #
+        change.files.append(file.path.toString)
+        change.formats.add(file.path.extension)
+        #
+        list_of_comments = file.get_comments()
+        if len(list_of_comments) > 0:
+            comments_counter += len(list_of_comments)
+            change.comments_text.append(file.path.name + ": " + str(list_of_comments))
+
+    return [change, comments_counter]
+
+def check(change, _reviewed_, comments_counter, pull_requests):
+    if not _reviewed_:
+        for pull_request in pull_requests:
+            if pull_request.conteins(commit):
+                _reviewed_ = True
+                change.state = "Reviewed"
+                change.reviewed = "True"
+                change.review += commit.url.replace("/rest/api/1.0", "")
+
+                for reviewer in pull_request.reviewers:
+                    change.reviewers.append(reviewer.name)
+
+                for comment in pull_request.comments:
+                    comments_counter += 1
+                    change.comments_text.append(str(comment))
+
+                change, comments_counter = get_comments(
+                    change, comments_counter, pull_request.get_commit_by_id(commit.id).files()
+                )
+
+    return [change, _reviewed_, comments_counter]
 
 
 ola_gang_num_style = "asdljgiod;fug09eirtelrmgmnknv;gheriljg"
@@ -11,6 +49,31 @@ class Start:
     def get_owner(self):
         return "Start::::"
 start = Start()
+
+
+def read_mappings(name_of_file):
+    output = {}
+    config = configparser.ConfigParser()
+    config.sections()
+    config.read(name_of_file)
+    for key in config['PathRespMapping']:
+        output[key] = config['PathRespMapping'][key]
+    return output
+
+def replace_domain_by_mapping(name_of_file, changes):
+    mappings = read_mappings(name_of_file)
+    domains = list()
+    for change in changes:
+        for file in change.files:
+            for mapping in mappings:
+                if mapping.lower() in file.lower():
+                    if mappings[mapping] not in domains:
+                        domains.append(mappings[mapping])
+                    break
+
+        change.domain = ", ".join(domains)
+    return changes
+
 
 if __name__ == "__main__":
     if os.path.exists('credentials'):
@@ -76,6 +139,7 @@ if __name__ == "__main__":
 
     # Fetch all information from commits
     commits = repository.commits()
+
     for commit in commits:
         if True:
             change = Change(start)
@@ -86,92 +150,19 @@ if __name__ == "__main__":
             change.date = commit.authorTimestamp
             change.author = commit.author.name
 
-            if not _reviewed_:
-                for pull_request in pull_requests_merged:
-                    if pull_request.conteins(commit):
-                        _reviewed_ = True
-                        change.state = "Reviewed"
-                        change.reviewed = "True"
-                        change.review += commit.url.replace("/rest/api/1.0", "")
-
-                        for reviewer in pull_request.reviewers:
-                            change.reviewers.append(reviewer.name)
-
-                        for comment in pull_request.comments:
-                            comments_counter += 1
-                            change.comments_text.append(str(comment))
-                        for file in pull_request.get_commit_by_id(commit.id).files():
-                            #
-                            change.files.append(file.path.toString)
-                            change.formats.add(file.path.extension)
-                            #
-                            list_of_comments = file.get_comments()
-                            if len(list_of_comments) > 0:
-                                comments_counter += len(list_of_comments)
-                                change.comments_text.append(file.path.name + ": " + str(list_of_comments))
-
-            if not _reviewed_:
-                for pull_request in pull_requests_open:
-                    if pull_request.conteins(commit):
-                        _reviewed_ = True
-                        change.state = "Under review"
-                        change.reviewed = "False"
-                        change.review += commit.url.replace("/rest/api/1.0", "")
-
-                        for comment in pull_request.comments:
-                            comments_counter += 1
-                            change.comments_text.append(str(comment))
-                        for file in pull_request.get_commit_by_id(commit.id).files:
-                            #
-                            change.files.append(file.path.toString)
-                            change.formats.add(file.path.extension)
-                            #
-                            list_of_comments = file.get_comments()
-                            if len(list_of_comments) > 0:
-                                comments_counter += len(list_of_comments)
-                                change.comments_text.append(file.path.name + ": " + str(list_of_comments))
-
-            if not _reviewed_:
-                for pull_request in pull_requests_declined:
-                    if pull_request.conteins(commit):
-                        _reviewed_ = True
-                        change.state = "Declined"
-                        change.reviewed = "True"
-                        change.review += commit.url.replace("/rest/api/1.0", "")
-
-                        for reviewer in pull_request.reviewers:
-                            change.reviewers.append(reviewer.name)
-                        for comment in pull_request.comments:
-                            comments_counter += 1
-                            change.comments_text.append(str(comment))
-                        for file in pull_request.get_commit_by_id(commit.id).files:
-                            #
-                            change.files.append(file.path.toString)
-                            change.formats.add(file.path.extension)
-                            #
-                            list_of_comments = file.get_comments()
-                            if len(list_of_comments) > 0:
-                                comments_counter += len(list_of_comments)
-                                change.comments_text.append(file.path.name + ": " + str(list_of_comments))
+            change, _reviewed_, comments_counter = check(change, _reviewed_, comments_counter, pull_requests_merged)
+            change, _reviewed_, comments_counter = check(change, _reviewed_, comments_counter, pull_requests_open)
+            change, _reviewed_, comments_counter = check(change, _reviewed_, comments_counter, pull_requests_declined)
 
             if not _reviewed_:
                 commit_files = commit.files()
                 if len(commit_files) == 0:
-                    break
-
-                for file in commit_files:
-                    #
-                    change.files.append(file.path.toString)
-                    change.formats.add(file.path.extension)
-                    #
-                    list_of_comments = file.get_comments()
-                    if len(list_of_comments) > 0:
-                        comments_counter += len(list_of_comments)
-                        change.comments_text.append(file.path.name + ": " + str(list_of_comments))
-
+                    continue
+                change, comments_counter = get_comments(change, comments_counter, commit_files)
             change.comments = comments_counter
-
             changes.append(change)
+
+    changes = replace_domain_by_mapping('responsibles.ini', changes)
 
     for change in changes:
         print('\n\n')

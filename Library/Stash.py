@@ -2,7 +2,7 @@ import urllib.request
 import base64
 import json
 
-from Project import Project
+from Library.Project import Project
 
 
 class Stash:
@@ -11,6 +11,11 @@ class Stash:
 
         self.url = self.__correct_path(path_to_stash) + "/rest/api/1.0"
         self.basic = (b"Basic " + base64.b64encode(login.encode()+b":"+password.encode())).decode()
+
+        self.requests = {
+            "unique": list(),
+            "duplicated": list()
+        }
 
     def get_owner(self, info=False):
         if info:
@@ -24,6 +29,13 @@ class Stash:
         # print("||", example)
         # print("||", url)
         # print("\|======")
+
+        if url in self.requests["unique"]:
+            self.requests["duplicated"].append(url)
+            print("WARNING: should be no same requests to Stash:", url)
+        else:
+            self.requests["unique"].append(url)
+
         req = urllib.request.Request(url)
         req.add_header("Authorization", self.basic)
         req.add_header("Content-Type", "application/json")

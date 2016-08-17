@@ -1,5 +1,5 @@
 from Library.Link import Link
-from Commit import Commit
+from Library.Commit import Commit
 
 
 class Repository:
@@ -46,7 +46,8 @@ class Repository:
             url = url.replace("/___branch___", "")
 
         commits = list()
-        for commit in self.stash.rest_request(example, url)["values"]:
+        commits_json = self.stash.rest_request(example, url)["values"]
+        for commit in commits_json:
             commits.append(Commit(self, self.url, self.stash, commit))
 
         return commits

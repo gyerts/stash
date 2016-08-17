@@ -1,4 +1,4 @@
-from Repository import Repository
+from Library.Repository import Repository
 from Library.Link import Link
 
 

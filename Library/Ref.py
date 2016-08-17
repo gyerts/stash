@@ -1,5 +1,5 @@
-from Repository import Repository
-from Project import Project
+from Library.Repository import Repository
+from Library.Project import Project
 
 
 class Ref:

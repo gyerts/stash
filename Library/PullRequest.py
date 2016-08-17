@@ -1,7 +1,7 @@
 from Library.Link import Link
 from Library.Ref import Ref
 from Library.Person import Person
-from Commit import Commit
+from Library.Commit import Commit
 from Library.File import File
 from Library.Comment import Comment
 

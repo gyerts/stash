@@ -11,12 +11,9 @@ class Commit:
         self.id = dict_commit['id']
         self.displayId = dict_commit['displayId']
         self.author = User(self, dict_commit['author'])
-
         self.authorTimestamp = time.ctime(dict_commit['authorTimestamp']/1000.0)
-
         self.message = dict_commit['message']
         self.parents = dict_commit['parents']
-
         self.url = "%s/commits/%s" % (url, self.id)
 
         if "" != pull_request_url:
@@ -27,7 +24,6 @@ class Commit:
         self.__files = None
 
     def files(self):
-        print(self.get_owner())
         if self.__files is None:
             self.__files = self.__get_changed_files()
 
@@ -37,7 +33,7 @@ class Commit:
         if info:
             ans = self.owner.get_owner() + " -> Commit: id=" + str(self.displayId)
         else:
-            ans = self.owner.get_owner() + " -> Commit: id=" + str(self.displayId)
+            ans = self.owner.get_owner() + " -> Commit"
         return ans
 
     def __get_changed_files(self):
@@ -59,7 +55,9 @@ class Commit:
         print(tab+"displayId =", self.displayId)
         print(tab+"message =", self.message)
         print(tab+"authorTimestamp =", self.authorTimestamp)
-        print(tab + "files: ")
-        for file in self.files:
-            print(tab + "   " + file.type + ": " + file.path.name)
+
+        if self.__files is not None:
+            print(tab + "files: ")
+            for file in self.__files:
+                print(tab + "   " + file.type + ": " + file.path.name)
         print(tab + "-------------------- */")
