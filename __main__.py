@@ -1,11 +1,11 @@
 import os
 import base64
-import json
 from Library.Stash import Stash
 from Library.PullRequest import PullRequest
 from Change import Change
 import configparser
 from report_generator_lib.report_views.stash_report_view import stash_report_view
+import getpass
 
 def get_comments(change, comments_counter, files):
     for file in files:
@@ -43,6 +43,31 @@ def check(change, _reviewed_, comments_counter, pull_requests, commit):
     return [change, _reviewed_, comments_counter]
 
 
+def add_commits_of_pull_request(pull_request, changes, state, reviewed):
+    for commit in pull_request.commits:
+        change = Change(start)
+        comments_counter = 0
+        change.change = commit.id
+        change.date = commit.authorTimestamp
+        change.author = commit.author.name
+        change.state = state
+        change.reviewed = reviewed
+        change.review += commit.url.replace("/rest/api/1.0", "")
+
+        for reviewer in pull_request.reviewers:
+            change.reviewers.append(reviewer.name)
+
+        for comment in pull_request.comments:
+            comments_counter += 1
+            change.comments_text.append(str(comment))
+
+        change, comments_counter = get_comments(
+            change, comments_counter, pull_request.get_commit_by_id(commit.id).files()
+        )
+        change.comments = comments_counter
+        changes.insert(0, change)
+
+
 ola_gang_num_style = "asdljgiod;fug09eirtelrmgmnknv;gheriljg"
 
 class Start:
@@ -60,10 +85,11 @@ def read_mappings(name_of_file):
         output[key] = config['PathRespMapping'][key]
     return output
 
-def replace_domain_by_mapping(name_of_file, changes):
+
+def add_domain_by_mapping(name_of_file, changes):
     mappings = read_mappings(name_of_file)
-    domains = list()
     for change in changes:
+        domains = list()
         for file in change.files:
             for mapping in mappings:
                 if mapping.lower() in file.lower():
@@ -71,6 +97,18 @@ def replace_domain_by_mapping(name_of_file, changes):
                         domains.append(mappings[mapping])
                     break
         change.domain = domains
+    return changes
+
+
+def replace_name_of_files_by_mapping(name_of_file, changes):
+    mappings = read_mappings(name_of_file)
+    for change in changes:
+        counter = 0
+        for file in change.files:
+            for mapping in mappings:
+                if mapping in file:
+                    change.files[counter] = file.replace(mapping, "<%s>" % mappings[mapping])
+            counter += 1
     return changes
 
 
@@ -86,7 +124,7 @@ def generate_stash_review_report(path_to_stash, project_name, repo_slug, respons
 
     else:
         login = input("Login: ")
-        password = input("Password: ")
+        password = getpass.getpass(prompt="Password: ")
 
         f = open("credentials", "wb")
         f.write(base64.b64encode(bytes(login + ola_gang_num_style, 'utf-8')))
@@ -125,43 +163,46 @@ def generate_stash_review_report(path_to_stash, project_name, repo_slug, respons
     commits = repository.commits()
 
     for commit in commits:
-        if True:
-            change = Change(start)
+        change = Change(start)
 
-            _reviewed_ = False
-            comments_counter = 0
-            change.change = commit.id
-            change.date = commit.authorTimestamp
-            change.author = commit.author.name
+        _reviewed_ = False
+        comments_counter = 0
+        change.change = commit.id
+        change.date = commit.authorTimestamp
+        change.author = commit.author.name
 
-            change, _reviewed_, comments_counter = \
-                check(change, _reviewed_, comments_counter, pull_requests_merged, commit)
+        change, _reviewed_, comments_counter = \
+            check(change, _reviewed_, comments_counter, pull_requests_merged, commit)
 
-            change, _reviewed_, comments_counter = \
-                check(change, _reviewed_, comments_counter, pull_requests_open, commit)
+        if not _reviewed_:
+            commit_files = commit.files()
+            if len(commit_files) == 0:
+                continue
+            change, comments_counter = get_comments(change, comments_counter, commit_files)
+        change.comments = comments_counter
+        changes.append(change)
 
-            change, _reviewed_, comments_counter = \
-                check(change, _reviewed_, comments_counter, pull_requests_declined, commit)
 
-            if not _reviewed_:
-                commit_files = commit.files()
-                if len(commit_files) == 0:
-                    continue
-                change, comments_counter = get_comments(change, comments_counter, commit_files)
-            change.comments = comments_counter
-            changes.append(change)
+    for pull_request in pull_requests_open:
+        add_commits_of_pull_request(pull_request, changes, "Under review", "False")
 
-    changes = replace_domain_by_mapping(responsibilities_ini, changes)
+    for pull_request in pull_requests_declined:
+        add_commits_of_pull_request(pull_request, changes, "Declined", "True")
+
+    changes = add_domain_by_mapping(responsibilities_ini, changes)
+    changes = replace_name_of_files_by_mapping(responsibilities_ini, changes)
     output = list()
     for change in changes:
         output.append(change.to_dict())
+
     stash_report_view(output, file_output)
 
 
 if __name__ == "__main__":
-    generate_stash_review_report(path_to_stash="https://adc.luxoft.com/stash",
-                                 responsibilities_ini="responsibles.ini",
-                                 project_name="Luxoft Tools",
-                                 repo_slug="unified-integration-tooling",
-                                 file_output="output.xlsx"
-                                 )
+    generate_stash_review_report(
+        path_to_stash="https://adc.luxoft.com/stash",
+        responsibilities_ini="responsibles.ini",
+        project_name="Luxoft Tools",
+        repo_slug="integration-tools",
+        file_output="output.xlsx"
+    )
